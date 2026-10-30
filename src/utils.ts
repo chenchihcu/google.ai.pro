@@ -4,6 +4,7 @@
  */
 
 import { MaterialType, MetricDataPoint, SensitivityPoint } from './types';
+import { Language } from './i18n/types';
 
 /**
  * Calculates theoretical flow rate based on physical simulation parameters.
@@ -106,37 +107,74 @@ export function generateInsights(
   temperature: number,
   speed: number,
   material: MaterialType,
-  flowRate: number
+  flowRate: number,
+  language: Language = 'zh'
 ): string[] {
+  const isEn = language === 'en';
   const insights: string[] = [];
 
   // Insight 1: Temperature & Consistency relationship
   const tempPerf = material === 'Polymer-A' ? '12%' : '18%';
-  if (temperature < 22) {
-    insights.push(`Low temperature (${temperature.toFixed(1)}°C) increases fluid flow viscosity, consider warming for a ${tempPerf} consistency gain.`);
+  if (isEn) {
+    if (temperature < 22) {
+      insights.push(`Low temperature (${temperature.toFixed(1)}°C) increases fluid flow viscosity, consider warming for a ${tempPerf} consistency gain.`);
+    } else {
+      insights.push(`Increasing temperature by 5 degrees improves flow consistency by ${tempPerf}.`);
+    }
   } else {
-    insights.push(`Increasing temperature by 5 degrees improves flow consistency by ${tempPerf}.`);
+    if (temperature < 22) {
+      insights.push(`低溫 (${temperature.toFixed(1)}°C) 會增加流體黏度，建議加溫以提升 ${tempPerf} 的一致性。`);
+    } else {
+      insights.push(`溫度提高 5 度可改善流量一致性達 ${tempPerf}。`);
+    }
   }
 
   // Insight 2: Material pressure sensitivity
-  if (pressure > 7.5) {
-    insights.push(`Critical: High pressure of ${pressure.toFixed(1)} psi poses high shearing stresses for ${material}.`);
+  if (isEn) {
+    if (pressure > 7.5) {
+      insights.push(`Critical: High pressure of ${pressure.toFixed(1)} psi poses high shearing stresses for ${material}.`);
+    } else {
+      insights.push(`Pressure sensitivity is ${pressure > 5 ? 'high' : 'nominal'} for current ${material} material configuration.`);
+    }
   } else {
-    insights.push(`Pressure sensitivity is ${pressure > 5 ? 'high' : 'nominal'} for current ${material === 'Polymer-A' ? 'Polymer-A' : 'Polymer-B'} material configuration.`);
+    const materialName = material === 'Polymer-A' ? 'Polymer-A (高分子 A)' : 'Polymer-B (高分子 B)';
+    if (pressure > 7.5) {
+      insights.push(`危急：${pressure.toFixed(1)} psi 的高壓會對 ${materialName} 產生過高的剪切應力。`);
+    } else {
+      const sensText = pressure > 5 ? '偏高' : '正常';
+      insights.push(`當前 ${materialName} 材料配置下的壓力靈敏度為${sensText}。`);
+    }
   }
 
   // Insight 3: Dispensing Speed balance
-  if (speed > 22) {
-    insights.push(`At ${speed} mm/s dispensing speed, nozzle drag-coefficient increases; match with +0.5 psi pressure.`);
+  const variance = ((Math.abs(flowRate - (pressure * 1.5)) / flowRate) * 100).toFixed(1);
+  if (isEn) {
+    if (speed > 22) {
+      insights.push(`At ${speed} mm/s dispensing speed, nozzle drag-coefficient increases; match with +0.5 psi pressure.`);
+    } else {
+      insights.push(`Theoretical flow output matches actual throughput margin with only ${variance}% variance.`);
+    }
   } else {
-    insights.push(`Theoretical flow output matches actual throughput margin with only ${((Math.abs(flowRate - (pressure*1.5)) / flowRate) * 100).toFixed(1)}% variance.`);
+    if (speed > 22) {
+      insights.push(`在 ${speed} mm/s 點膠速度下，噴嘴阻力係數上升；建議搭配增加 +0.5 psi 壓力。`);
+    } else {
+      insights.push(`理論流量輸出與實際輸送量偏差僅 ${variance}%，符合容許邊界。`);
+    }
   }
 
   // Insight 4: Structural material recommendation
-  if (material === 'Polymer-A') {
-    insights.push("Stability and laminar state are optimal under current low shear speed envelopes.");
+  if (isEn) {
+    if (material === 'Polymer-A') {
+      insights.push('Stability and laminar state are optimal under current low shear speed envelopes.');
+    } else {
+      insights.push("Polymer-B's low-viscosity properties improve accuracy yields but can lead to dynamic pooling.");
+    }
   } else {
-    insights.push("Polymer-B's low-viscosity properties improve accuracy yields but can lead to dynamic pooling.");
+    if (material === 'Polymer-A') {
+      insights.push('在當前低剪切速度範圍內，層流狀態與穩定性達到最佳。');
+    } else {
+      insights.push('Polymer-B 的低黏度特性能提高精準度良率，但可能導致動態積膠現象。');
+    }
   }
 
   return insights;

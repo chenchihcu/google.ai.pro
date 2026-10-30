@@ -13,6 +13,7 @@ import {
   Cpu,
   Database,
   Download,
+  Globe,
   Grid,
   Info,
   Layers,
@@ -38,10 +39,13 @@ import {
 import ThreeDView from './components/ThreeDView';
 import SensitivitySpark from './components/SensitivitySpark';
 import FlowTrends from './components/FlowTrends';
+import { useLanguage } from './i18n';
 
 export type ViewMode = 'overview' | 'threed' | 'trends' | 'controls';
 
 export default function App() {
+  const { language, toggleLanguage, t } = useLanguage();
+
   // 1. Core Parameter Control States
   const [state, setState] = useState<DashboardState>({
     pressure: 5.2, // psi
@@ -183,9 +187,9 @@ export default function App() {
 
   // Export telemetries as browser-native CSV file
   const handleExport = () => {
-    let csvContent = 'data:text/csv;charset=utf-8,';
+    let csvContent = 'data:text/csv;charset=utf-8,\uFEFF';
     csvContent +=
-      'Timestamp,Pressure (psi),Temperature (C),Dispensing Speed (mm/s),Material,Actual Flow (mg/sec),Theoretical Flow (mg/sec)\n';
+      `${t.csv.headerTimestamp},${t.csv.headerPressure},${t.csv.headerTemperature},${t.csv.headerSpeed},${t.csv.headerMaterial},${t.csv.headerActualFlow},${t.csv.headerTheoreticalFlow}\n`;
 
     history.forEach((row) => {
       csvContent += `${row.time},${state.pressure},${state.temperature},${state.dispensingSpeed},${state.materialType},${row.actual},${row.theoretical}\n`;
@@ -213,15 +217,16 @@ export default function App() {
     state.temperature,
     state.dispensingSpeed,
     state.materialType,
-    actualFlow
+    actualFlow,
+    language
   );
 
   // View modes navigation definitions
   const viewModesList = [
-    { id: 'overview' as ViewMode, label: '總覽模式', shortLabel: '總覽', icon: Grid },
-    { id: 'threed' as ViewMode, label: '3D 模擬', shortLabel: '3D 視圖', icon: Box },
-    { id: 'trends' as ViewMode, label: '趨勢洞察', shortLabel: '流量趨勢', icon: LineChart },
-    { id: 'controls' as ViewMode, label: '參數調控', shortLabel: '參數微調', icon: Sliders },
+    { id: 'overview' as ViewMode, label: t.navigation.overview, shortLabel: t.navigation.overviewShort, icon: Grid },
+    { id: 'threed' as ViewMode, label: t.navigation.threed, shortLabel: t.navigation.threedShort, icon: Box },
+    { id: 'trends' as ViewMode, label: t.navigation.trends, shortLabel: t.navigation.trendsShort, icon: LineChart },
+    { id: 'controls' as ViewMode, label: t.navigation.controls, shortLabel: t.navigation.controlsShort, icon: Sliders },
   ];
 
   /* ------------------- Subcomponents: Parameter Controls Card ------------------- */
@@ -230,10 +235,10 @@ export default function App() {
       <div>
         <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-5">
           <span className="text-xs font-mono tracking-widest text-slate-500 uppercase font-semibold">
-            PARAMETER CONTROLS
+            {t.parameters.title}
           </span>
           <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full font-medium">
-            Live Input
+            {t.parameters.liveInput}
           </span>
         </div>
 
@@ -242,7 +247,7 @@ export default function App() {
           {/* 1. Pressure Selector */}
           <div id="control-pressure-wrapper">
             <div className="flex justify-between items-baseline mb-2 text-xs font-mono font-medium">
-              <span className="text-slate-500 tracking-wider">PRESSURE</span>
+              <span className="text-slate-500 tracking-wider">{t.parameters.pressure}</span>
               <span className="text-indigo-600 font-bold text-sm">
                 {state.pressure.toFixed(1)} psi
               </span>
@@ -252,7 +257,7 @@ export default function App() {
                 type="button"
                 onClick={() => stepValue('pressure', -0.1)}
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-600 flex items-center justify-center shrink-0 transition-colors cursor-pointer touch-manipulation"
-                aria-label="Decrease Pressure"
+                aria-label={t.parameters.decreasePressure}
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
@@ -265,13 +270,13 @@ export default function App() {
                 onChange={(e) => handleSliderChange('pressure', parseFloat(e.target.value))}
                 className="w-full accent-indigo-600 h-2 bg-slate-100 hover:bg-slate-200 rounded-lg appearance-none cursor-pointer transition-all"
                 id="slider-control-pressure"
-                aria-label="Pressure Slider"
+                aria-label={t.parameters.pressure}
               />
               <button
                 type="button"
                 onClick={() => stepValue('pressure', 0.1)}
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-600 flex items-center justify-center shrink-0 transition-colors cursor-pointer touch-manipulation"
-                aria-label="Increase Pressure"
+                aria-label={t.parameters.increasePressure}
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
@@ -286,7 +291,7 @@ export default function App() {
           {/* 2. Temperature Selector */}
           <div id="control-temperature-wrapper">
             <div className="flex justify-between items-baseline mb-2 text-xs font-mono font-medium">
-              <span className="text-slate-500 tracking-wider">TEMPERATURE</span>
+              <span className="text-slate-500 tracking-wider">{t.parameters.temperature}</span>
               <span className="text-amber-600 font-bold text-sm">
                 {state.temperature.toFixed(1)} °C
               </span>
@@ -296,7 +301,7 @@ export default function App() {
                 type="button"
                 onClick={() => stepValue('temperature', -0.5)}
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-600 flex items-center justify-center shrink-0 transition-colors cursor-pointer touch-manipulation"
-                aria-label="Decrease Temperature"
+                aria-label={t.parameters.decreaseTemperature}
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
@@ -309,13 +314,13 @@ export default function App() {
                 onChange={(e) => handleSliderChange('temperature', parseFloat(e.target.value))}
                 className="w-full accent-amber-500 h-2 bg-slate-100 hover:bg-slate-200 rounded-lg appearance-none cursor-pointer transition-all"
                 id="slider-control-temperature"
-                aria-label="Temperature Slider"
+                aria-label={t.parameters.temperature}
               />
               <button
                 type="button"
                 onClick={() => stepValue('temperature', 0.5)}
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-600 flex items-center justify-center shrink-0 transition-colors cursor-pointer touch-manipulation"
-                aria-label="Increase Temperature"
+                aria-label={t.parameters.increaseTemperature}
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
@@ -330,7 +335,7 @@ export default function App() {
           {/* 3. Dispensing Speed Selector */}
           <div id="control-speed-wrapper">
             <div className="flex justify-between items-baseline mb-2 text-xs font-mono font-medium">
-              <span className="text-slate-500 tracking-wider">DISPENSING SPEED</span>
+              <span className="text-slate-500 tracking-wider">{t.parameters.dispensingSpeed}</span>
               <span className="text-indigo-600 font-bold text-sm">
                 {state.dispensingSpeed} mm/s
               </span>
@@ -340,7 +345,7 @@ export default function App() {
                 type="button"
                 onClick={() => stepValue('dispensingSpeed', -1)}
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-600 flex items-center justify-center shrink-0 transition-colors cursor-pointer touch-manipulation"
-                aria-label="Decrease Speed"
+                aria-label={t.parameters.decreaseSpeed}
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
@@ -353,13 +358,13 @@ export default function App() {
                 onChange={(e) => handleSliderChange('dispensingSpeed', parseInt(e.target.value))}
                 className="w-full accent-indigo-600 h-2 bg-slate-100 hover:bg-slate-200 rounded-lg appearance-none cursor-pointer transition-all"
                 id="slider-control-speed"
-                aria-label="Dispensing Speed Slider"
+                aria-label={t.parameters.dispensingSpeed}
               />
               <button
                 type="button"
                 onClick={() => stepValue('dispensingSpeed', 1)}
                 className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-600 flex items-center justify-center shrink-0 transition-colors cursor-pointer touch-manipulation"
-                aria-label="Increase Speed"
+                aria-label={t.parameters.increaseSpeed}
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
@@ -378,10 +383,10 @@ export default function App() {
           <div className="flex items-center justify-between" id="control-material-toggle">
             <div>
               <span className="text-xs font-mono text-slate-600 tracking-wider font-semibold block">
-                MATERIAL TYPE
+                {t.parameters.materialType}
               </span>
               <span className="text-[10px] font-mono text-slate-400">
-                {state.materialType === 'Polymer-A' ? 'High Viscosity' : 'Low Viscosity'}
+                {state.materialType === 'Polymer-A' ? t.parameters.highViscosity : t.parameters.lowViscosity}
               </span>
             </div>
             <button
@@ -409,10 +414,10 @@ export default function App() {
           <div className="flex items-center justify-between" id="control-history-toggle">
             <div>
               <span className="text-xs font-mono text-slate-600 tracking-wider font-semibold block">
-                HISTORICAL DATA
+                {t.parameters.historicalData}
               </span>
               <span className="text-[10px] font-mono text-slate-400">
-                {state.showHistoricalData ? 'Archival Smoothing' : 'Live Sensor Stream'}
+                {state.showHistoricalData ? t.parameters.archivalSmoothing : t.parameters.liveSensorStream}
               </span>
             </div>
             <button
@@ -441,13 +446,13 @@ export default function App() {
       {/* Informative Configuration Summary Label overlay block */}
       <div className="mt-6 bg-slate-50 p-3.5 rounded-xl border border-slate-200/60 text-[10px] font-mono text-slate-500">
         <div className="flex justify-between py-1 border-b border-slate-200/60 font-semibold text-slate-600">
-          <span>ACTIVE TARGET:</span>
+          <span>{t.parameters.activeTarget}</span>
           <span className="text-indigo-600">{state.materialType}</span>
         </div>
         <div className="flex justify-between py-1 pt-1.5 font-semibold text-slate-600">
-          <span>STATE LOG:</span>
+          <span>{t.parameters.stateLog}</span>
           <span className="text-indigo-600/90">
-            {state.showHistoricalData ? 'ARCHIVAL' : 'LIVE FEED TELEMETRY'}
+            {state.showHistoricalData ? t.parameters.archival : t.parameters.liveFeedTelemetry}
           </span>
         </div>
       </div>
@@ -461,18 +466,18 @@ export default function App() {
         <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono tracking-widest text-slate-500 uppercase block font-semibold">
-              PRESSURE-TEMPERATURE-FLOW MANIFOLD
+              {t.manifold3d.title}
             </span>
             <span className="hidden sm:inline-block text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">
-              3D Wireframe
+              {t.manifold3d.wireframeBadge}
             </span>
           </div>
           <button
             type="button"
             onClick={() => setViewMode(viewMode === 'threed' ? 'overview' : 'threed')}
             className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
-            title={viewMode === 'threed' ? '縮小視窗' : '放大全螢幕檢視'}
-            aria-label="Toggle 3D View Mode"
+            title={viewMode === 'threed' ? t.manifold3d.minimize : t.manifold3d.maximize}
+            aria-label={viewMode === 'threed' ? t.manifold3d.minimize : t.manifold3d.maximize}
           >
             <Maximize2 className="w-3.5 h-3.5" />
           </button>
@@ -498,7 +503,7 @@ export default function App() {
           {/* 1. Consistency Bar */}
           <div>
             <div className="flex justify-between text-[10px] font-mono mb-1 text-slate-500 font-semibold uppercase">
-              <span>CONSISTENCY QUALITY</span>
+              <span>{t.manifold3d.consistencyQuality}</span>
               <span className="text-amber-600 font-bold">{consistency}%</span>
             </div>
             <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/50 shadow-inner">
@@ -512,7 +517,7 @@ export default function App() {
           {/* 2. Stability Bar */}
           <div>
             <div className="flex justify-between text-[10px] font-mono mb-1 text-slate-500 font-semibold uppercase">
-              <span>STABILITY RATING</span>
+              <span>{t.manifold3d.stabilityRating}</span>
               <span className="text-indigo-600 font-bold">{stability}%</span>
             </div>
             <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/50 shadow-inner">
@@ -526,7 +531,7 @@ export default function App() {
           {/* 3. Accuracy Bar */}
           <div>
             <div className="flex justify-between text-[10px] font-mono mb-1 text-slate-500 font-semibold uppercase">
-              <span>ACCURACY CERTIFICATE</span>
+              <span>{t.manifold3d.accuracyCertificate}</span>
               <span className="text-emerald-600 font-bold">{accuracy}%</span>
             </div>
             <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/50 shadow-inner">
@@ -548,7 +553,7 @@ export default function App() {
           id="btn-reset-simulation"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          <span>Reset</span>
+          <span>{t.common.reset}</span>
         </button>
 
         <button
@@ -558,7 +563,7 @@ export default function App() {
           id="btn-export-telemetry"
         >
           <Download className="w-3.5 h-3.5 text-white/90" />
-          <span>Export</span>
+          <span>{t.common.export}</span>
         </button>
       </div>
     </div>
@@ -573,15 +578,15 @@ export default function App() {
       <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono tracking-widest text-slate-500 uppercase block font-semibold">
-            DATA INSIGHTS
+            {t.insights.title}
           </span>
           <span className="text-[9px] text-amber-600 border border-amber-200/50 bg-amber-50 px-1.5 py-0.5 rounded-full font-mono uppercase font-bold">
-            Dynamic
+            {t.insights.dynamicBadge}
           </span>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono font-medium">
           <Cpu className="w-3 h-3 text-indigo-600" />
-          <span className="hidden sm:inline">AI-DRIVEN SUMMARIES</span>
+          <span className="hidden sm:inline">{t.insights.aiDrivenSummaries}</span>
         </div>
       </div>
 
@@ -604,9 +609,9 @@ export default function App() {
       <div className="mt-4 pt-3.5 border-t border-slate-100 flex justify-between text-[9px] font-mono text-slate-400">
         <div className="flex items-center gap-1 font-medium">
           <Info className="w-3 h-3 text-slate-400" />
-          <span>Model: V3.94</span>
+          <span>{t.common.modelVer}</span>
         </div>
-        <span className="font-semibold text-indigo-600/90">Feed: Nominal</span>
+        <span className="font-semibold text-indigo-600/90">{t.common.feedNominal}</span>
       </div>
     </div>
   );
@@ -644,7 +649,7 @@ export default function App() {
                   KINETIC FLOW
                 </h2>
                 <span className="text-[9px] font-mono tracking-widest text-slate-500 uppercase block -mt-0.5">
-                  Flow System V3
+                  {t.common.systemV3}
                 </span>
               </div>
             )}
@@ -655,7 +660,7 @@ export default function App() {
             type="button"
             onClick={() => setMobileMenuOpen(false)}
             className="p-1.5 text-slate-400 hover:text-white lg:hidden rounded-lg hover:bg-slate-800 transition-colors"
-            aria-label="Close Mobile Menu"
+            aria-label={t.common.closeMenu}
           >
             <X className="w-5 h-5" />
           </button>
@@ -665,7 +670,7 @@ export default function App() {
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {(!sidebarCollapsed || mobileMenuOpen) && (
             <div className="text-[10px] uppercase tracking-widest font-mono font-semibold text-slate-500 px-3 mb-2">
-              MAIN CONSOLES
+              {t.navigation.mainConsoles}
             </div>
           )}
 
@@ -682,7 +687,7 @@ export default function App() {
             }`}
           >
             <Grid className="w-4 h-4 text-indigo-500 shrink-0" />
-            {(!sidebarCollapsed || mobileMenuOpen) && <span>總覽儀表板</span>}
+            {(!sidebarCollapsed || mobileMenuOpen) && <span>{t.navigation.overview}</span>}
           </button>
 
           <button
@@ -698,7 +703,7 @@ export default function App() {
             }`}
           >
             <TrendingUp className="w-4 h-4 text-amber-500 shrink-0" />
-            {(!sidebarCollapsed || mobileMenuOpen) && <span>資料分析系統</span>}
+            {(!sidebarCollapsed || mobileMenuOpen) && <span>{t.navigation.trends}</span>}
           </button>
 
           <button
@@ -714,7 +719,7 @@ export default function App() {
             }`}
           >
             <Layers className="w-4 h-4 text-indigo-400 shrink-0" />
-            {(!sidebarCollapsed || mobileMenuOpen) && <span>製程流量模擬</span>}
+            {(!sidebarCollapsed || mobileMenuOpen) && <span>{t.navigation.threed}</span>}
           </button>
 
           <button
@@ -730,18 +735,18 @@ export default function App() {
             }`}
           >
             <Database className="w-4 h-4 text-emerald-400 shrink-0" />
-            {(!sidebarCollapsed || mobileMenuOpen) && <span>感測參數設定</span>}
+            {(!sidebarCollapsed || mobileMenuOpen) && <span>{t.navigation.controls}</span>}
           </button>
 
           {(!sidebarCollapsed || mobileMenuOpen) && (
             <>
               <div className="pt-6 text-[10px] uppercase tracking-widest font-mono font-semibold text-slate-500 px-3 mb-2">
-                SYSTEM STATUS
+                {t.navigation.systemStatus}
               </div>
               <div className="px-3 py-2 text-xs text-slate-400 flex items-center justify-between">
-                <span>連線狀態</span>
+                <span>{t.common.connectionStatus}</span>
                 <span className="bg-emerald-500/10 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded font-bold">
-                  在線監控中
+                  {t.common.onlineMonitoring}
                 </span>
               </div>
             </>
@@ -754,14 +759,14 @@ export default function App() {
             type="button"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             className="w-full py-1.5 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            title={sidebarCollapsed ? '展開側邊欄' : '折疊側邊欄'}
+            title={sidebarCollapsed ? t.common.expandSidebar : t.common.collapseSidebar}
           >
             {sidebarCollapsed ? (
               <ChevronRight className="w-4 h-4" />
             ) : (
               <>
                 <ChevronLeft className="w-4 h-4" />
-                <span className="text-[10px] font-mono">折疊側邊欄</span>
+                <span className="text-[10px] font-mono">{t.common.collapseSidebar}</span>
               </>
             )}
           </button>
@@ -780,11 +785,23 @@ export default function App() {
               </div>
             </div>
             <div className="mt-2.5 flex items-center justify-between text-[10px] font-mono text-slate-500">
-              <span>流體分析工程師</span>
+              <span>{t.common.engineerRole}</span>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Nominal
+                {t.common.nominal}
               </span>
+            </div>
+            {/* Sidebar Language Switcher */}
+            <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <span className="text-[10px] font-mono text-slate-500">{t.header.langSwitch}</span>
+              <button
+                type="button"
+                onClick={toggleLanguage}
+                className="px-2 py-0.5 text-[10px] font-mono rounded bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-slate-700 transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <Globe className="w-3 h-3 text-indigo-400" />
+                <span>{language === 'zh' ? 'English' : '繁體中文'}</span>
+              </button>
             </div>
           </div>
         )}
@@ -803,17 +820,17 @@ export default function App() {
               type="button"
               onClick={() => setMobileMenuOpen(true)}
               className="lg:hidden p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer shrink-0"
-              aria-label="Open Navigation Menu"
+              aria-label={t.common.openMenu}
             >
               <Menu className="w-5 h-5" />
             </button>
 
             <div className="flex flex-col min-w-0">
               <h1 className="text-sm sm:text-lg font-bold text-slate-900 tracking-tight leading-tight truncate">
-                Animated Flow Analytics
+                {t.header.title}
               </h1>
               <p className="text-[10px] sm:text-[11px] text-slate-400 font-mono -mt-0.5 hidden xs:block truncate">
-                真實數據與模擬演算法協調儀表板
+                {t.header.subtitle}
               </p>
             </div>
           </div>
@@ -841,14 +858,27 @@ export default function App() {
             })}
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Header Language Switcher */}
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-mono font-medium rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 text-slate-700 transition-colors cursor-pointer shadow-xs"
+              title={t.header.langSwitch}
+              aria-label={t.header.langSwitch}
+              id="header-lang-switch-btn"
+            >
+              <Globe className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+              <span className="font-semibold text-indigo-700">{language === 'zh' ? 'EN' : '中文'}</span>
+            </button>
+
             {/* Notifications Alert icon */}
             <button
               type="button"
               className="p-2 text-slate-400 hover:text-indigo-600 transition-colors relative bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg cursor-pointer flex items-center justify-center"
-              title="Notifications"
+              title={t.common.notifications}
               id="header-notification-bell"
-              aria-label="Notifications"
+              aria-label={t.common.notifications}
             >
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-indigo-600 rounded-full animate-ping" />
@@ -861,10 +891,10 @@ export default function App() {
               onClick={handleExport}
               className="px-3 sm:px-4 py-2 font-semibold text-xs text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 font-mono transition-all rounded-full flex items-center gap-1.5 shadow-sm shadow-indigo-100 uppercase cursor-pointer"
               id="header-export-btn"
-              title="匯出 CSV 數據"
+              title={t.common.exportCsv}
             >
               <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">匯出數據</span>
+              <span className="hidden sm:inline">{t.common.exportData}</span>
             </button>
           </div>
         </header>
@@ -876,11 +906,11 @@ export default function App() {
         >
           <div className="flex items-center truncate">
             <span className="hover:text-slate-600 transition-colors cursor-pointer hidden sm:inline">
-              核心儀表板
+              {t.header.breadcrumbsRoot}
             </span>
             <span className="mx-2 text-slate-400 hidden sm:inline">&gt;</span>
             <span className="hover:text-slate-600 transition-colors cursor-pointer">
-              流道動態監控
+              {t.header.breadcrumbsSub}
             </span>
             <span className="mx-2 text-slate-400">&gt;</span>
             <span className="text-indigo-600 font-bold uppercase truncate">
@@ -888,7 +918,7 @@ export default function App() {
             </span>
           </div>
           <div className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 font-medium shrink-0">
-            SYSTEM: V3.94
+            {t.common.systemVer}
           </div>
         </div>
 
@@ -902,15 +932,15 @@ export default function App() {
                 {renderParameterControlsCard()}
                 <div className="flex gap-3 sm:gap-4" id="viscosity-needle-sensitivity-grid">
                   <SensitivitySpark
-                    title="Viscosity Sensitivity"
-                    level={state.temperature < 20 || state.materialType === 'Polymer-A' ? 'High' : 'Medium'}
+                    title={t.sensitivity.viscosityTitle}
+                    level={state.temperature < 20 || state.materialType === 'Polymer-A' ? t.sensitivity.levelHigh : t.sensitivity.levelMedium}
                     value={state.materialType === 'Polymer-A' ? '+0.85' : '+0.68'}
                     color="cyan"
                     baseSlope={state.materialType === 'Polymer-A' ? 0.72 : 0.54}
                   />
                   <SensitivitySpark
-                    title="Needle Sensitivity"
-                    level={state.dispensingSpeed > 20 ? 'High' : 'Medium'}
+                    title={t.sensitivity.needleTitle}
+                    level={state.dispensingSpeed > 20 ? t.sensitivity.levelHigh : t.sensitivity.levelMedium}
                     value={state.dispensingSpeed > 20 ? '+0.61' : '+0.42'}
                     color="orange"
                     baseSlope={state.dispensingSpeed > 20 ? 0.58 : 0.38}
@@ -943,17 +973,17 @@ export default function App() {
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
                   <span className="text-xs font-mono font-semibold text-slate-500 uppercase tracking-wider">
-                    REAL-TIME 3D PARAMETER TUNER
+                    {t.manifold3d.tunerTitle}
                   </span>
                   <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded font-medium">
-                    即時曲面形變
+                    {t.manifold3d.surfaceDeformation}
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Pressure Quick Slider */}
                   <div>
                     <div className="flex justify-between text-xs font-mono mb-1.5">
-                      <span className="text-slate-500">Pressure</span>
+                      <span className="text-slate-500">{t.parameters.pressure}</span>
                       <span className="text-indigo-600 font-bold">{state.pressure.toFixed(1)} psi</span>
                     </div>
                     <input
@@ -969,7 +999,7 @@ export default function App() {
                   {/* Temp Quick Slider */}
                   <div>
                     <div className="flex justify-between text-xs font-mono mb-1.5">
-                      <span className="text-slate-500">Temperature</span>
+                      <span className="text-slate-500">{t.parameters.temperature}</span>
                       <span className="text-amber-600 font-bold">{state.temperature.toFixed(1)} °C</span>
                     </div>
                     <input
@@ -985,7 +1015,7 @@ export default function App() {
                   {/* Speed Quick Slider */}
                   <div>
                     <div className="flex justify-between text-xs font-mono mb-1.5">
-                      <span className="text-slate-500">Dispensing Speed</span>
+                      <span className="text-slate-500">{t.parameters.dispensingSpeed}</span>
                       <span className="text-indigo-600 font-bold">{state.dispensingSpeed} mm/s</span>
                     </div>
                     <input
@@ -1016,16 +1046,16 @@ export default function App() {
                 <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-sm">
                   <div>
                     <span className="text-xs font-mono tracking-widest text-slate-500 uppercase block font-semibold mb-4 border-b border-slate-100 pb-2">
-                      RECENT TELEMETRY STREAM
+                      {t.telemetryTable.title}
                     </span>
                     <div className="overflow-x-auto max-h-[300px]">
                       <table className="w-full text-left text-xs font-mono">
                         <thead>
                           <tr className="border-b border-slate-100 text-[10px] text-slate-400">
-                            <th className="py-2">Time</th>
-                            <th className="py-2">Actual (mg/s)</th>
-                            <th className="py-2">Theoretical</th>
-                            <th className="py-2">Delta</th>
+                            <th className="py-2">{t.telemetryTable.time}</th>
+                            <th className="py-2">{t.telemetryTable.actual}</th>
+                            <th className="py-2">{t.telemetryTable.theoretical}</th>
+                            <th className="py-2">{t.telemetryTable.delta}</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -1050,7 +1080,7 @@ export default function App() {
                     className="mt-4 w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-mono text-xs flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    <span>下載完整遙測記錄 CSV</span>
+                    <span>{t.telemetryTable.downloadCsv}</span>
                   </button>
                 </div>
               </div>
@@ -1065,15 +1095,15 @@ export default function App() {
                 <div className="space-y-6">
                   <div className="flex gap-4">
                     <SensitivitySpark
-                      title="Viscosity Sensitivity"
-                      level={state.temperature < 20 || state.materialType === 'Polymer-A' ? 'High' : 'Medium'}
+                      title={t.sensitivity.viscosityTitle}
+                      level={state.temperature < 20 || state.materialType === 'Polymer-A' ? t.sensitivity.levelHigh : t.sensitivity.levelMedium}
                       value={state.materialType === 'Polymer-A' ? '+0.85' : '+0.68'}
                       color="cyan"
                       baseSlope={state.materialType === 'Polymer-A' ? 0.72 : 0.54}
                     />
                     <SensitivitySpark
-                      title="Needle Sensitivity"
-                      level={state.dispensingSpeed > 20 ? 'High' : 'Medium'}
+                      title={t.sensitivity.needleTitle}
+                      level={state.dispensingSpeed > 20 ? t.sensitivity.levelHigh : t.sensitivity.levelMedium}
                       value={state.dispensingSpeed > 20 ? '+0.61' : '+0.42'}
                       color="orange"
                       baseSlope={state.dispensingSpeed > 20 ? 0.58 : 0.38}
@@ -1094,15 +1124,15 @@ export default function App() {
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-slate-500 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shadow-[0_0_5px_#10b981]" />
-              SYSTEM STABILIZED
+              {t.common.systemStabilized}
             </span>
             <span className="hidden sm:inline text-slate-200">|</span>
-            <span className="hidden sm:inline font-medium">NODES: 6 ONLINE</span>
+            <span className="hidden sm:inline font-medium">{t.common.nodesOnline}</span>
           </div>
 
           <div className="flex items-center gap-4 sm:gap-5 text-slate-400 font-medium">
-            <span className="hidden xs:inline">PORT: INTERLOCK</span>
-            <span>FPS: 60/60</span>
+            <span className="hidden xs:inline">{t.common.portInterlock}</span>
+            <span>{t.common.fps}</span>
           </div>
         </footer>
       </div>

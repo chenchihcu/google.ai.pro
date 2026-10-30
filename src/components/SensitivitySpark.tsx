@@ -7,14 +7,16 @@ import React, { useMemo } from 'react';
 import { generateSensitivityScatter } from '../utils';
 
 interface SensitivitySparkProps {
+  id?: string;
   title: string;
-  level: string; // "High" or "Medium" or "Low"
+  level: string; // "High" or "Medium" or "Low" or localized
   value: string; // "+0.85"
   color: 'cyan' | 'orange';
   baseSlope: number; // Slope factor for the fit line
 }
 
 export default function SensitivitySpark({
+  id,
   title,
   level,
   value,
@@ -50,7 +52,7 @@ export default function SensitivitySpark({
   return (
     <div
       className="flex-1 min-w-0 bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between shadow-sm"
-      id={`sensitivity-spark-${title.toLowerCase().replace(/\s+/g, '-')}`}
+      id={id || `sensitivity-spark-${color}`}
     >
       <div>
         <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase block font-semibold">

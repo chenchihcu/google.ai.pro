@@ -7,6 +7,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { MaterialType } from '../types';
 import { calculateTheoreticalFlow } from '../utils';
+import { useLanguage } from '../i18n';
 
 interface ThreeDViewProps {
   pressure: number;
@@ -21,6 +22,7 @@ export default function ThreeDView({
   dispensingSpeed,
   materialType,
 }: ThreeDViewProps) {
+  const { t } = useLanguage();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -386,7 +388,7 @@ export default function ThreeDView({
         ctx.fillText((ratio * 40).toFixed(0), pt.x, pt.y + 11);
       }
       const pAxisLabelLoc = project(0, 0.65, -0.4);
-      ctx.fillText('PRESSURE (psi)', pAxisLabelLoc.x, pAxisLabelLoc.y + 16);
+      ctx.fillText(t.manifold3d.axisPressure, pAxisLabelLoc.x, pAxisLabelLoc.y + 16);
 
       // 3D Axis: TEMPERATURE (along the Y bounding axis)
       const tLabStart = project(0.5, -0.5, -0.4);
@@ -402,7 +404,7 @@ export default function ThreeDView({
       ctx.save();
       ctx.translate(tAxisLabelLoc.x + 14, tAxisLabelLoc.y + 14);
       ctx.rotate(0.35);
-      ctx.fillText('TEMPERATURE (°C)', 0, 0);
+      ctx.fillText(t.manifold3d.axisTemperature, 0, 0);
       ctx.restore();
 
       // 3D Axis: FLOW RATE Z axis tick labels (vertical)
@@ -419,7 +421,7 @@ export default function ThreeDView({
       const zLabelPos = project(-0.53, -0.53, 0);
       ctx.translate(zLabelPos.x - 24, zLabelPos.y);
       ctx.rotate(-Math.PI / 2);
-      ctx.fillText('FLOW RATE (mg/sec)', 0, 0);
+      ctx.fillText(t.manifold3d.axisFlowRate, 0, 0);
       ctx.restore();
 
       // Draw structural bounding box vertical lines to anchor the cube
@@ -525,7 +527,7 @@ export default function ThreeDView({
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [dimensions, yaw, pitch, pressure, temperature, dispensingSpeed, materialType]);
+  }, [dimensions, yaw, pitch, pressure, temperature, dispensingSpeed, materialType, t]);
 
   return (
     <div
@@ -554,15 +556,15 @@ export default function ThreeDView({
         type="button"
         onClick={resetOrientation}
         className="absolute left-3 bottom-3 p-1.5 px-2 bg-white/90 hover:bg-white active:bg-slate-100 text-slate-600 hover:text-indigo-600 rounded-lg shadow-sm border border-slate-200/80 text-[10px] font-mono flex items-center gap-1.5 transition-all cursor-pointer z-10"
-        title="Reset 3D View Angle"
-        aria-label="Reset View Angle"
+        title={t.manifold3d.resetView}
+        aria-label={t.manifold3d.resetView}
       >
         <RotateCcw className="w-3 h-3 text-indigo-600" />
-        <span className="font-medium">Reset View</span>
+        <span className="font-medium">{t.manifold3d.resetView}</span>
       </button>
 
       <div className="absolute right-3 bottom-3 text-[10px] font-mono text-slate-500 bg-white/90 px-2.5 py-1 rounded-md shadow-sm border border-slate-200/60 pointer-events-none select-none">
-        Drag to Orbit • Yaw: {yaw.toFixed(2)} rad
+        {t.manifold3d.dragToOrbit} {yaw.toFixed(2)} rad
       </div>
     </div>
   );

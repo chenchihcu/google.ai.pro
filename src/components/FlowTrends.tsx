@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { MetricDataPoint } from '../types';
+import { useLanguage } from '../i18n';
 
 interface FlowTrendsProps {
   currentFlowRate: number;
@@ -17,6 +18,7 @@ export default function FlowTrends({
   theoreticalFlowRate,
   trendHistory,
 }: FlowTrendsProps) {
+  const { t } = useLanguage();
   
   // Semicircular Circular Gauge calculations
   // Max scale is 30 mg/sec
@@ -84,17 +86,17 @@ export default function FlowTrends({
       <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-3">
         <div>
           <span className="text-xs font-mono tracking-widest text-slate-500 uppercase block font-semibold">
-            FLOW RATE TRENDS
+            {t.trends.title}
           </span>
           {/* Custom Legend */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[10px] font-mono">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-0.5 rounded-full bg-indigo-600 inline-block shadow-[0_0_4px_rgba(79,70,229,0.4)]"></span>
-              <span className="text-slate-600 font-medium">Actual</span>
+              <span className="text-slate-600 font-medium">{t.trends.actual}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-0.5 rounded-full bg-amber-500 inline-block"></span>
-              <span className="text-slate-500 font-medium">Theoretical</span>
+              <span className="text-slate-500 font-medium">{t.trends.theoretical}</span>
             </div>
           </div>
         </div>
@@ -148,7 +150,7 @@ export default function FlowTrends({
               {currentFlowRate.toFixed(1)}
             </span>
             <span className="text-[9px] font-mono font-medium text-slate-500 mt-1 leading-none">
-              mg/sec
+              {t.common.unitMgSec}
             </span>
           </div>
         </div>

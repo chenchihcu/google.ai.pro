@@ -5,6 +5,8 @@
 
 export type MaterialType = 'Polymer-A' | 'Polymer-B';
 
+export type { Language } from './i18n/types';
+
 export interface DashboardState {
   pressure: number; // psi (0 to 10)
   temperature: number; // °C (15 to 35)
