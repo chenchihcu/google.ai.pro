@@ -49,7 +49,7 @@ export default function SensitivitySpark({
 
   return (
     <div
-      className="flex-1 bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between shadow-sm"
+      className="flex-1 min-w-0 bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-between shadow-sm"
       id={`sensitivity-spark-${title.toLowerCase().replace(/\s+/g, '-')}`}
     >
       <div>

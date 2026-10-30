@@ -77,30 +77,30 @@ export default function FlowTrends({
 
   return (
     <div
-      className="bg-white border border-slate-200 rounded-2xl p-6 flex flex-col justify-between shadow-sm relative overflow-hidden"
+      className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 flex flex-col justify-between shadow-sm relative overflow-hidden"
       id="flow-rate-trends-panel"
     >
       {/* Panel header layout */}
-      <div className="flex justify-between items-start gap-4">
+      <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center gap-3">
         <div>
           <span className="text-xs font-mono tracking-widest text-slate-500 uppercase block font-semibold">
             FLOW RATE TRENDS
           </span>
           {/* Custom Legend */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[10px] font-mono">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[10px] font-mono">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-0.5 rounded-full bg-indigo-600 inline-block shadow-[0_0_4px_rgba(79,70,229,0.4)]"></span>
-              <span className="text-slate-600 font-medium">Actual Flow Rate</span>
+              <span className="text-slate-600 font-medium">Actual</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-0.5 rounded-full bg-amber-500 inline-block"></span>
-              <span className="text-slate-500 font-medium">Theoretical Flow Rate</span>
+              <span className="text-slate-500 font-medium">Theoretical</span>
             </div>
           </div>
         </div>
 
         {/* Double track circle radial gauge */}
-        <div className="relative flex items-center justify-center w-24 h-24 flex-shrink-0" id="radial-flow-gauge">
+        <div className="relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 self-end xs:self-auto" id="radial-flow-gauge">
           <svg className="w-full h-full -rotate-225" viewBox="0 0 100 100">
             {/* Ambient Background static ring */}
             <circle

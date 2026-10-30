@@ -4,6 +4,7 @@
  */
 
 import React, { useRef, useEffect, useState } from 'react';
+import { RotateCcw } from 'lucide-react';
 import { MaterialType } from '../types';
 import { calculateTheoreticalFlow } from '../utils';
 
@@ -74,7 +75,6 @@ export default function ThreeDView({
     const dx = e.clientX - dragStartRef.current.x;
     const dy = e.clientY - dragStartRef.current.y;
 
-    // Adjust sensitivity
     const yawSpeed = 0.007;
     const pitchSpeed = 0.007;
 
@@ -84,6 +84,40 @@ export default function ThreeDView({
 
   const handleMouseUpOrLeave = () => {
     setIsDragging(false);
+  };
+
+  // Mobile Touch Gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      dragStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        yaw,
+        pitch,
+      };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - dragStartRef.current.x;
+    const dy = e.touches[0].clientY - dragStartRef.current.y;
+
+    const yawSpeed = 0.008;
+    const pitchSpeed = 0.008;
+
+    setYaw(dragStartRef.current.yaw - dx * yawSpeed);
+    setPitch(Math.max(0.15, Math.min(1.4, dragStartRef.current.pitch + dy * pitchSpeed)));
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  const resetOrientation = () => {
+    setYaw(-0.6);
+    setPitch(0.65);
   };
 
   // Main Render Loop
@@ -105,9 +139,10 @@ export default function ThreeDView({
 
     // Grid details
     const gridSize = 19; // Number of subdivisions
-    const scaleX = 140; // Size factor X
-    const scaleY = 140; // Size factor Y
-    const scaleZ = 130; // Height factor
+    const scaleFactor = Math.min(1, Math.min(width / 460, height / 320));
+    const scaleX = 140 * scaleFactor; // Size factor X
+    const scaleY = 140 * scaleFactor; // Size factor Y
+    const scaleZ = 130 * scaleFactor; // Height factor
 
     // Center of projection space
     const cx = width / 2;
@@ -495,11 +530,16 @@ export default function ThreeDView({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full min-h-[300px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+      className="relative w-full h-full min-h-[260px] sm:min-h-[300px] flex items-center justify-center cursor-grab active:cursor-grabbing select-none"
+      style={{ touchAction: 'none' }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUpOrLeave}
       onMouseLeave={handleMouseUpOrLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
       id="three-d-projection-container"
     >
       <canvas
@@ -508,6 +548,19 @@ export default function ThreeDView({
         className="w-full h-full drop-shadow-sm"
         id="three-d-wireframe-canvas"
       />
+      
+      {/* Mobile-friendly reset angle button */}
+      <button
+        type="button"
+        onClick={resetOrientation}
+        className="absolute left-3 bottom-3 p-1.5 px-2 bg-white/90 hover:bg-white active:bg-slate-100 text-slate-600 hover:text-indigo-600 rounded-lg shadow-sm border border-slate-200/80 text-[10px] font-mono flex items-center gap-1.5 transition-all cursor-pointer z-10"
+        title="Reset 3D View Angle"
+        aria-label="Reset View Angle"
+      >
+        <RotateCcw className="w-3 h-3 text-indigo-600" />
+        <span className="font-medium">Reset View</span>
+      </button>
+
       <div className="absolute right-3 bottom-3 text-[10px] font-mono text-slate-500 bg-white/90 px-2.5 py-1 rounded-md shadow-sm border border-slate-200/60 pointer-events-none select-none">
         Drag to Orbit • Yaw: {yaw.toFixed(2)} rad
       </div>
