@@ -1,0 +1,6 @@
+{
+  "name": "Animated Flow Analytics Dashboard",
+  "description": "An interactive parameter-driven visualization dashboard containing an animated 3D pressure-temperature-flow rate wireframe surface, real-time actual vs. theoretical trends, dynamic gauges, and automated analytical insights.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
